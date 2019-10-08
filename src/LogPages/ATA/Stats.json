@@ -1,0 +1,37 @@
+{
+    "type" : "AtaStatsSupported",
+    "size" : 512,
+    "Attributes" :
+    [
+        {
+            "Name" : "Header",
+            "Offset" : 0,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "NumEntries",
+            "Offset" : 8,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LogNumberFirst",
+            "Offset" : 9,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LogNumberSecond",
+            "Offset" : 10,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LogNumberThird",
+            "Offset" : 11,
+            "Size" : 1,
+            "Datatype" : "int"
+        }
+    ]
+}

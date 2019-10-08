@@ -1,0 +1,145 @@
+{
+    "type" : "NCQCmdErrLog",
+    "size" : 512,
+    "Attributes" :
+    [
+        {
+            "Name" : "Header",
+            "Offset" : 0,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Status",
+            "Offset" : 2,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Error",
+            "Offset" : 3,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LBA1",
+            "Offset" : 4,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LBA2",
+            "Offset" : 5,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LBA3",
+            "Offset" : 6,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Device",
+            "Offset" : 7,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LBA4",
+            "Offset" : 8,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LBA5",
+            "Offset" : 9,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LBA6",
+            "Offset" : 10,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Count1",
+            "Offset" : 12,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Count2",
+            "Offset" : 13,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "SenseKey",
+            "Offset" : 14,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "SenseCode",
+            "Offset" : 15,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "SenseCodeQualifier",
+            "Offset" : 16,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FinalLBAinError1",
+            "Offset" : 17,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FinalLBAinError2",
+            "Offset" : 18,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FinalLBAinError3",
+            "Offset" : 19,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FinalLBAinError4",
+            "Offset" : 20,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FinalLBAinError5",
+            "Offset" : 21,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FinalLBAinError6",
+            "Offset" : 22,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Vendor Specific",
+            "Offset" : 256,
+            "Size" : 255,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "Checksum",
+            "Offset" : 511,
+            "Size" : 1,
+            "Datatype" : "int"
+        }
+    ]
+}

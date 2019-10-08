@@ -1,0 +1,55 @@
+{
+    "type" : "FirmwareSlotInformation",
+    "size" : 64,
+    "Attributes" :
+    [
+        {
+            "Name" : "ActiveFirmwareInfo",
+            "Offset" : 0,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot1",
+            "Offset" : 8,
+            "Size" : 8,
+            "Datatype" : "string"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot2",
+            "Offset" : 16,
+            "Size" : 8,
+            "Datatype" : "string"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot3",
+            "Offset" : 24,
+            "Size" : 8,
+            "Datatype" : "string"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot4",
+            "Offset" : 32,
+            "Size" : 8,
+            "Datatype" : "string"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot5",
+            "Offset" : 40,
+            "Size" : 8,
+            "Datatype" : "string"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot6",
+            "Offset" : 48,
+            "Size" : 8,
+            "Datatype" : "string"
+        },
+        {
+            "Name" : "FirmwareRevisionSlot7",
+            "Offset" : 56,
+            "Size" : 8,
+            "Datatype" : "string"
+        }
+    ]
+}

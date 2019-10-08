@@ -1,0 +1,85 @@
+{
+    "type" : "WCSCloudSSD",
+    "size" : 512,
+    "Attributes" :
+    [
+        {
+            "Name" : "MediaUnitsWritten",
+            "Offset" : 0,
+            "Size" : 16,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "ECCIterations",
+            "Offset" : 16,
+            "Size" : 16,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CapacitorHealth",
+            "Offset" : 32,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "SupportedFeatures",
+            "Offset" : 33,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "PowerConsumption",
+            "Offset" : 34,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "WearRangeDelta",
+            "Offset" : 35,
+            "Size" : 1,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "TemperatureThrottling",
+            "Offset" : 40,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "UnalignedIO",
+            "Offset" : 48,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "MappedLBAs",
+            "Offset" : 56,
+            "Size" : 4,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "ProgramFailCount",
+            "Offset" : 60,
+            "Size" : 4,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "EraseFailCount",
+            "Offset" : 64,
+            "Size" : 4,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "SercurityVersion",
+            "Offset" : 80,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "LogPageVersion",
+            "Offset" : 510,
+            "Size" : 2,
+            "Datatype" : "int"
+        }
+    ]
+}

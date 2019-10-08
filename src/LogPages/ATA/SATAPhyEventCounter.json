@@ -1,0 +1,13 @@
+{
+    "type" : "AtaSATAPhyEventCounter",
+    "size" : 508,
+    "Attributes" :
+    [
+        {
+            "Name" : "CounterIdAndValueBlob",
+            "Offset" : 4,
+            "Size" : 508,
+            "Datatype" : "int"
+        }
+    ]
+}

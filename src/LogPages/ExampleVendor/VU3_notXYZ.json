@@ -1,0 +1,19 @@
+{
+    "type" : "VU3_notXYZ",
+    "size" : 12,
+    "Attributes" :
+    [
+        {
+            "Name" : "ExampleField1",
+            "Offset" : 0,
+            "Size" : 4,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "ExampleField2",
+            "Offset" : 4,
+            "Size" : 8,
+            "Datatype" : "string"
+        }
+    ]
+}

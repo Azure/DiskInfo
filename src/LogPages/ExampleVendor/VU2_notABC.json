@@ -1,0 +1,19 @@
+{
+    "type" : "VU2_notABC",
+    "size" : 16,
+    "Attributes" :
+    [
+        {
+            "Name" : "ExampleField1",
+            "Offset" : 0,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "ExampleField2",
+            "Offset" : 8,
+            "Size" : 8,
+            "Datatype" : "string"
+        }
+    ]
+}
