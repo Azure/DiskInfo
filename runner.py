@@ -3,7 +3,7 @@
 """
 
 from src.classify     import classify
-from src.deviceinfo   import collectDiskInfo
+from src.sequencer    import collectDiskInfo
 
 if __name__ == "__main__":
     
