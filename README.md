@@ -22,13 +22,13 @@ Note: It is understood vendor unique telemetry data can be protected IP, so vend
 
 # Quick Setup
 The tool will automatically scan for physical storage devices on the execution system, output data to diskData.json file in the top level directory, and print information to screen by running the following command:
-
-  # python runner.py
-  
+  ```
+  python runner.py
+  ```
 To output to a specific directory, a parameter can be provided like so:
-
-  # python runner.py example/output/dir
-  
+  ```
+  python runner.py example/output/dir
+  ```
 # Vendor Specific Extensions
 To add vendor specific telemetry data, the following changes must occur:
   1. Update src/classify.py to ensure the proper function is returned from vendor specific model file (e.g. Models.ExampleVendorFile.NVME) based on the Product ID, Bus Type, and Manufacturer info collected by WMIC. This should only need to be done once per model (i.e. not for each additional log page added).
