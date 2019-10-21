@@ -7,7 +7,7 @@ import time
 import logging
 
 from .constants      import *
-from .wmic           import *
+from .discovery      import *
 from .nvme           import storeNVMeDevice
 from .ata            import storeATADevice
 from .datahandle     import outputData
@@ -37,10 +37,10 @@ def collectDiskInfo(classifier):
     
     # Parse disk data one at a time.
     for disk in disks:
-        model = disk[WMIC_MSFT_DISK_MODEL]
-        bus = int(disk[WMIC_MSFT_DISK_BUS_TYPE])
-        mnfgr = disk[WMIC_MSFT_DISK_MANUFACTURER]
-        diskNumber = int(disk[WMIC_MSFT_DISK_OSDISK])
+        model = disk[DISK_MODEL]
+        bus = int(disk[DISK_BUS_TYPE])
+        mnfgr = disk[DISK_MANUFACTURER]
+        diskNumber = int(disk[DISK_OSDISK])
         drive = (model, bus, mnfgr)
         
         # Re-classify this drive to account for any bit flips in WMIC data.
@@ -54,7 +54,7 @@ def collectDiskInfo(classifier):
             deviceDict = {}
             logging.debug("Vendor = {0}, bus = {1} = {2}".format(vendor, bus, BUS_TYPE_NAMES[bus]))
                 
-            storeWMICData(disk, deviceDict)
+            storeDiskData(disk, deviceDict)
             if bus == BUS_TYPE_NVME:
                 storeNVMeDevice(diskNumber, model, deviceDict, drive, result)
             elif bus == BUS_TYPE_SATA:

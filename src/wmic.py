@@ -4,6 +4,7 @@
 
 import subprocess
 import re
+import logging
 
 # We must use the MSFT_PhysicalDisk class to see the actual devices and not virtual disks.
 WMIC_DISK_CMD = r"wmic /namespace:\\root\microsoft\windows\storage path MSFT_PhysicalDisk get DeviceId, Manufacturer, Model, BusType, SerialNumber"
@@ -14,20 +15,7 @@ WMIC_DISK_CMD = r"wmic /namespace:\\root\microsoft\windows\storage path MSFT_Phy
 # 17       1                       Z1001                    4200_0119_B315_0100_00F0_6E0B_0100_0000.
 # 11       0                       WDC  WDS500G2B0A-00SM50  190893803568
 
-# WMIC MSFT_PhysicalDisk Attributes
-WMIC_MSFT_DISK_OSDISK           = "DeviceId"
-WMIC_MSFT_DISK_MANUFACTURER     = "Manufacturer"
-WMIC_MSFT_DISK_MODEL            = "Model"
-WMIC_MSFT_DISK_BUS_TYPE         = "BusType"
-WMIC_MSFT_DISK_SERIAL_NUMBER    = "SerialNumber"
-
 # borrowed example from http://autosqa.com/2016/03/18/how-to-parse-wmic-output-with-python/
-
-def storeWMICData(wmicdata, devicedict):
-    devicedict.update({WMIC_MSFT_DISK_OSDISK:wmicdata[WMIC_MSFT_DISK_OSDISK]})
-    devicedict.update({WMIC_MSFT_DISK_MODEL:wmicdata[WMIC_MSFT_DISK_MODEL]})
-    devicedict.update({WMIC_MSFT_DISK_SERIAL_NUMBER:wmicdata[WMIC_MSFT_DISK_SERIAL_NUMBER]})
-    devicedict.update({WMIC_MSFT_DISK_BUS_TYPE:wmicdata[WMIC_MSFT_DISK_BUS_TYPE]})
 
 # Parsing format of WMIC
 def parse_wmic_output(text):
@@ -55,10 +43,15 @@ def parse_wmic_output(text):
         result.append(row)
     return result
 
-def get_disks():
+def get_disks_wmic():
     proc = subprocess.Popen(WMIC_DISK_CMD.split(), stdout=subprocess.PIPE)
     stdout, stderr = proc.communicate()
-    result = parse_wmic_output(stdout.decode('ascii').rstrip())
     errcode = proc.returncode
+    if (not errcode):
+        logging.debug("WMIC is supported")
+        result = parse_wmic_output(stdout.decode('ascii').rstrip())
+    else:
+        logging.info("WMIC is not supported")
+        result = 0
     
-    return result
+    return errcode, result
