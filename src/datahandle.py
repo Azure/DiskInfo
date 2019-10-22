@@ -80,7 +80,7 @@ def parseLog(logdata, conffile, byteswap):
 
 
 def outputData(nodeDict, resultFolder, outputToScreen):
-    resultFile = 'diskData.json'
+    resultFile = "diskData{0}.json".format(int(nodeDict['DeviceId']))
 
     if (outputToScreen):
         print(json.dumps(nodeDict, indent=2))
