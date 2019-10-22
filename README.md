@@ -21,7 +21,7 @@ By using this tool, IHVs can verify the data being collected is accurate and doe
 Note: It is understood vendor unique telemetry data can be protected IP, so vendor unique classifier, model, and log page extensions may not be upstreamed to this repository unless vendors choose to. Instead, a private branch can be created by the IHV and extensions shared with Microsoft for integration into Microsoft private branch.
 
 # Quick Setup
-The tool will automatically scan for physical storage devices on the execution system, output data to diskData.json file in the top level directory, and print information to screen by running the following command:
+The tool will automatically scan for physical storage devices on the execution system and output JSON telemetry file per disk in the top level directory by running the following command:
   ```
   python runner.py
   ```
@@ -29,6 +29,13 @@ To output to a specific directory, a parameter can be provided like so:
   ```
   python runner.py example/output/dir
   ```
+To output to the screen, output option can be provided like so:
+  ```
+  python runner.py -o
+  ```
+# Compatibility
+The tool is currently only compatible with Windows. It relies on WMI infrastructure with WMIC or PowerShell front end for discovering disk on the current machine. It only understands how to collect telemetry for NVMe and ATA storage devices.
+
 # Vendor Specific Extensions
 To add vendor specific telemetry data, the following changes must occur:
   1. Update src/classify.py to ensure the proper function is returned from vendor specific model file (e.g. Models.ExampleVendorFile.NVME) based on the Product ID, Bus Type, and Manufacturer info collected by WMIC. This should only need to be done once per model (i.e. not for each additional log page added).
