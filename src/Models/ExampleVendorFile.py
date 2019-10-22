@@ -41,3 +41,9 @@ def SATA():
     bus = BUS_TYPE_SATA
     result = (vendor, bus, None)
     return(result);
+    
+def isExampleVendor(model):
+    if (model.startswith("ExampleProdId")):
+        return True
+    else:
+        return False
