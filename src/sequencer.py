@@ -6,17 +6,18 @@ import sys
 import time
 import logging
 
-from .constants      import *
-from .discovery      import *
-from .nvme           import storeNVMeDevice
-from .ata            import storeATADevice
-from .datahandle     import outputData
+from optparse       import OptionParser
+from .constants     import *
+from .discovery     import *
+from .nvme          import storeNVMeDevice
+from .ata           import storeATADevice
+from .datahandle    import outputData
 
 # Uncomment the appropriate logging level to control output verbosity.
 #logging.basicConfig(level=logging.DEBUG)
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 #logging.basicConfig(level=logging.WARNING)
-#logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.ERROR)
 #logging.basicConfig(level=logging.CRITICAL)
 
 def collectDiskInfo(classifier):
@@ -24,7 +25,14 @@ def collectDiskInfo(classifier):
     # Capture start time for performance measurement debug.
     tStart = time.time()
     
-    if (len(sys.argv) > 1):
+    # Setup options and arguments.
+    usage = "python runner.py outputDirectory [options]"
+    parser = OptionParser(usage=usage)
+    output = False
+    parser.add_option("-o", "--output", action="store_true", dest="output", help="Output disk data only to screen")
+    (options, args) = parser.parse_args()
+    
+    if ((len(sys.argv) > 1) and not (options.output)):
         resultFolder = sys.argv[1]
     else:
         resultFolder = '.'
@@ -62,7 +70,7 @@ def collectDiskInfo(classifier):
             nodeDict.append(deviceDict)
     
     # Output the disk data.
-    outputData(nodeDict, resultFolder)
+    outputData(nodeDict, resultFolder, options.output)
 
     # Capture end time for performance measurement debug.
     tEnd = time.time()
