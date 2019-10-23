@@ -25,6 +25,10 @@ SATA_ON_SAS_ID  = "ATA"
 # Delay value is in second granularity.
 LOG_FETCH_DELAY = 0.01
 
+# Limiting the number of log pages that can be fetched from a single device
+# to avoid overwhelming the telemetry pipe.
+LOG_VU_MAX      = 5
+
 LOG_PAGE_DIR    = "src/LogPages/"
 LOG_PAGE_DIR_VU = "src/LogPages/"
 

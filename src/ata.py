@@ -27,6 +27,9 @@ ATA_LOG_NCQ_CMD_ERROR_LOG       = 0x10
 ATA_LOG_SATA_PHY_EVENT_COUNTER  = 0x11
 ATA_LOG_IDENTIFY                = 0x30
 
+ATA_LOG_VU_START                = 0xA0
+ATA_LOG_VU_END                  = 0xDF
+
 # Identify Support Bit Identifiers
 WORD76_NCQ_FEATURE_BIT          = (0x01 << 8)
 WORD76_SATA_PHY_EVENT_COUNT_BIT = (0x01 << 10)
@@ -58,30 +61,33 @@ def storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, itsares
         vuLogs = GETVULOGS(drive, model, fwRev)
         logging.debug("vuLogs {0}".format(vuLogs))
         if vuLogs is not None:
+            logsFetched = 0
             for logpage in vuLogs:
-                logging.debug("logpage {0}".format(logpage))
-                # logpage should be a tuple or list of length 3
-                logpagelen = len(logpage)
-                if ( (3 <= logpagelen) and (logpagelen < 4) ):
-                    logpageid   = logpage[0]
-                    logpagejson = logpage[1]
-                    isSmart     = logpage[2]
-                    
-                    if ((logpageid >= 0xA0) and (logpageid <= 0xDF)):
-                        logbuffer =  GetATADeviceLog(diskNumber, logpageid, 0, isSmart)
+                if (logsFetched <= LOG_VU_MAX):
+                    logging.debug("logpage {0}".format(logpage))
+                    # logpage should be a tuple or list of length 3
+                    logpagelen = len(logpage)
+                    if ( (3 <= logpagelen) and (logpagelen < 4) ):
+                        logpageid   = logpage[0]
+                        logpagejson = logpage[1]
+                        isSmart     = logpage[2]
+                        
+                        if ((logpageid >= ATA_LOG_VU_START) and (logpageid <= ATA_LOG_VU_END)):
+                            logbuffer =  GetATADeviceLog(diskNumber, logpageid, 0, isSmart)
+                        else:
+                            logging.warning("Log page is not in legal VU range.")
+                            logbuffer = 0
+                        
+                        time.sleep(LOG_FETCH_DELAY)
+                        logging.debug("logbuffer {0}".format(logbuffer))
+                        if logbuffer != 0:
+                            logpagejson = logPageDirVu() + logpagejson
+                            logging.debug("enter parseLog {0}".format(logpagejson))
+                            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logpagejson, True))
+                            logging.debug("leave parseLog {0}".format(logpagejson))
+                            logsFetched += 1
                     else:
-                        # Log page is not in legal VU range.
-                        logbuffer = 0
-                    
-                    time.sleep(LOG_FETCH_DELAY)
-                    logging.debug("logbuffer {0}".format(logbuffer))
-                    if logbuffer != 0:
-                        logpagejson = logPageDirVu() + logpagejson
-                        logging.debug("enter parseLog {0}".format(logpagejson))
-                        devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logpagejson, True))
-                        logging.debug("leave parseLog {0}".format(logpagejson))
-                else:
-                    logging.warning("Invalid VU log page information provided")
+                        logging.warning("Invalid VU log page information provided")
 
 
 def storeATADeviceGPLLogs(diskNumber, devicedict, logSupport):

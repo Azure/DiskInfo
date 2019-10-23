@@ -23,9 +23,13 @@ NVME_LOG_PAGE_COMMAND_EFFECTS               = 0x05
 NVME_LOG_PAGE_DEVICE_SELF_TEST              = 0x06
 NVME_LOG_PAGE_TELEMETRY_HOST_INITIATED      = 0x07
 NVME_LOG_PAGE_TELEMETRY_CTLR_INITIATED      = 0x08
+
 NVME_LOG_PAGE_RESERVATION_NOTIFICATION      = 0x80
 NVME_LOG_PAGE_SANITIZE_STATUS               = 0x81
+
+NVME_LOG_PAGE_VU_START                      = 0xC0
 NVME_LOG_PAGE_WCS_CLOUD_SSD                 = 0xC0
+NVME_LOG_PAGE_VU_END                        = 0xFF
 
 # NVMe Log Bit Parsers
 ACTIVE_FIRMWARE_INFO_BITMASK                = 0x7
@@ -38,32 +42,35 @@ def storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, itsare
         vuLogs = GETVULOGS(drive, model, fwRev)
         logging.debug("vuLogs {0}".format(vuLogs))
         if vuLogs is not None:
+            logsFetched = 0
             for logpage in vuLogs:
-                logging.debug("logpage {0}".format(logpage))
-                ## logpage should be a tuple or list of length 2 (or 3 when CNS provided)
-                logpagelen = len(logpage)
-                if ( (2 <= logpagelen) and (logpagelen < 4) ):
-                    logpageid   = logpage[0]
-                    logpagejson = logpage[1]
-                    if (2 < logpagelen):
-                        cns = logpage[2]
-                    else:
-                        cns = CNS_CONTROLLER
+                if (logsFetched <= LOG_VU_MAX):
+                    logging.debug("logpage {0}".format(logpage))
+                    ## logpage should be a tuple or list of length 2 (or 3 when CNS provided)
+                    logpagelen = len(logpage)
+                    if ( (2 <= logpagelen) and (logpagelen < 4) ):
+                        logpageid   = logpage[0]
+                        logpagejson = logpage[1]
+                        if (2 < logpagelen):
+                            cns = logpage[2]
+                        else:
+                            cns = CNS_CONTROLLER
 
-                    if ((logpageid >= 0xC0) and (logpageid <= 0xFF)):
-                        logbuffer =  GetNVMeLog(diskNumber, logpageid, cns)
+                        if ((NVME_LOG_PAGE_VU_START >= 0xC0) and (logpageid <= NVME_LOG_PAGE_VU_END)):
+                            logbuffer =  GetNVMeLog(diskNumber, logpageid, cns)
+                        else:
+                            logging.warning("Log page is not in legal VU range.")
+                            logbuffer = 0
+                        time.sleep(LOG_FETCH_DELAY)
+                        logging.debug("logbuffer {0}".format(logbuffer))
+                        if logbuffer != 0:
+                            logpagejson = logPageDirVu() + logpagejson
+                            logging.debug("enter parseLog {0}".format(logpagejson))
+                            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logpagejson, False))
+                            logging.debug("leave parseLog {0}".format(logpagejson))
+                            logsFetched += 1
                     else:
-                        # Log page is not in legal VU range.
-                        logbuffer = 0
-                    time.sleep(LOG_FETCH_DELAY)
-                    logging.debug("logbuffer {0}".format(logbuffer))
-                    if logbuffer != 0:
-                        logpagejson = logPageDirVu() + logpagejson
-                        logging.debug("enter parseLog {0}".format(logpagejson))
-                        devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logpagejson, False))
-                        logging.debug("leave parseLog {0}".format(logpagejson))
-                else:
-                    logging.warning("Invalid VU log page information provided")
+                        logging.warning("Invalid VU log page information provided")
 
 def storeNVMeDeviceStandardLogs(diskNumber, devicedict):
     logbuffer =  GetNVMeLog(diskNumber, NVME_LOG_PAGE_HEALTH_INFO, CNS_NAMESPACE)
