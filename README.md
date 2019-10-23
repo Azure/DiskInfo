@@ -38,6 +38,6 @@ The tool is currently only compatible with Windows. It relies on WMI infrastruct
 
 # Vendor Specific Extensions
 To add vendor specific telemetry data, the following changes must occur:
-  1. Update src/classify.py to ensure the proper function is returned from vendor specific model file (e.g. Models.ExampleVendorFile.NVME) based on the Product ID, Bus Type, and Manufacturer info collected by WMIC. This should only need to be done once per model (i.e. not for each additional log page added).
+  1. Update src/classify.py to ensure the proper function is returned from vendor specific model file (e.g. src.Models.ExampleVendorFile.NVME) based on the Product ID, Bus Type, and Manufacturer info collected by WMIC. This should only need to be done once per model (i.e. not for each additional log page added).
   2. Update vendor specific model file (e.g. src/Models/ExampleVendorFile.py) to return a tuple of supported vendor unique log pages based on the function provided in step 1, the model number, and the firmware revision.
   3. Add JSON file to vendor specific log page folder (e.g. src/LogPages/ExampleVendor/VU1.json) to properly parse vendor unique log page.
