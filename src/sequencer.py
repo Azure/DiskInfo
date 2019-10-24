@@ -32,12 +32,13 @@ def collectDiskInfo(classifier):
     parser.add_option("-o", "--output", action="store_true", dest="output", help="Output disk data only to screen")
     (options, args) = parser.parse_args()
     
-    if ((len(sys.argv) > 1) and not (options.output)):
+    resultFolder = '.'
+    
+    if (options.output):
+        # Output mode pushes only final result to stdout
+        logging.basicConfig(level=logging.CRITICAL)
+    elif (len(sys.argv) > 1):
         resultFolder = sys.argv[1]
-    else:
-        resultFolder = '.'
-
-    disks = []
     
     # Query the disks on the node.
     disks = get_disks()
