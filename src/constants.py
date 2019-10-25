@@ -2,6 +2,8 @@
     Copyright (c) Microsoft Corporation
 """
 
+import os
+
 # BusType Enums
 BUS_TYPE_SCSI   =  1
 BUS_TYPE_ATA    =  3
@@ -29,8 +31,8 @@ LOG_FETCH_DELAY = 0.01
 # to avoid overwhelming the telemetry pipe.
 LOG_VU_MAX      = 5
 
-LOG_PAGE_DIR    = "src/LogPages/"
-LOG_PAGE_DIR_VU = "src/LogPages/"
+LOG_PAGE_DIR    = os.path.join(os.path.dirname(__file__), "LogPages/")
+LOG_PAGE_DIR_VU = os.path.join(os.path.dirname(__file__), "LogPages/")
 
 def setLogPageDir(dirSrc):
     global LOG_PAGE_DIR

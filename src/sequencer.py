@@ -28,7 +28,6 @@ def collectDiskInfo(classifier):
     # Setup options and arguments.
     usage = "python runner.py outputDirectory [options]"
     parser = OptionParser(usage=usage)
-    output = False
     parser.add_option("-o", "--output", action="store_true", dest="output", help="Output disk data only to screen")
     (options, args) = parser.parse_args()
     
