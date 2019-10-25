@@ -32,11 +32,7 @@ LOG_FETCH_DELAY = 0.01
 LOG_VU_MAX      = 5
 
 LOG_PAGE_DIR    = os.path.join(os.path.dirname(__file__), "LogPages/")
-LOG_PAGE_DIR_VU = os.path.join(os.path.dirname(__file__), "LogPages/")
-
-def setLogPageDir(dirSrc):
-    global LOG_PAGE_DIR
-    LOG_PAGE_DIR = dirSrc
+LOG_PAGE_DIR_VU = LOG_PAGE_DIR
     
 def logPageDir():
     global LOG_PAGE_DIR
