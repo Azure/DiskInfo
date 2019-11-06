@@ -4,7 +4,7 @@
 
 import src.Models.ExampleVendorFile
 
-from .constants import *
+from .constants                 import *
 from .Models.ExampleVendorFile  import *
 
 

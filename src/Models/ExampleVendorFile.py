@@ -9,22 +9,22 @@ firmwareXYZ         = "XYZ12345"
 
 def GETVULOGSNVME(drive, modelNumber, firmware):
     result = [ 
-        ( NVME_LOG_PAGE_VU1, "LogPages/ExampleVendor/VU1.json" )
+        ( NVME_LOG_PAGE_VU1, "ExampleVendor/VU1.json" )
         ]
     
     # Logs that change byte layout based on model number.
     if (modelNumber == modelABC):
-        json = "LogPages/ExampleVendor/VU2_ABC.json"
+        json = "ExampleVendor/VU2_ABC.json"
     else:
-        json = "LogPages/ExampleVendor/VU2_notABC.json"
+        json = "ExampleVendor/VU2_notABC.json"
     logpage = (NVME_LOG_PAGE_VU2, json)
     result.append(logpage)
     
     # Logs that change byte layout based on firmware rev.
     if (firmware == firmwareXYZ):
-        json = "LogPages/ExampleVendor/VU3_XYZ.json"
+        json = "ExampleVendor/VU3_XYZ.json"
     else:
-        json = "LogPages/ExampleVendor/VU3_notXYZ.json"
+        json = "ExampleVendor/VU3_notXYZ.json"
     logpage = (NVME_LOG_PAGE_VU3, json)
     result.append(logpage)
     
