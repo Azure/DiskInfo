@@ -12,11 +12,11 @@ DISK_MODEL            = "Model"
 DISK_BUS_TYPE         = "BusType"
 DISK_SERIAL_NUMBER    = "SerialNumber"
 
-def storeDiskData(wmicdata, devicedict):
-    devicedict.update({DISK_OSDISK:wmicdata[DISK_OSDISK]})
-    devicedict.update({DISK_MODEL:wmicdata[DISK_MODEL]})
-    devicedict.update({DISK_SERIAL_NUMBER:wmicdata[DISK_SERIAL_NUMBER]})
-    devicedict.update({DISK_BUS_TYPE:wmicdata[DISK_BUS_TYPE]})
+def storeDiskData(diskdata, devicedict):
+    devicedict.update({DISK_OSDISK:diskdata[DISK_OSDISK]})
+    devicedict.update({DISK_MODEL:diskdata[DISK_MODEL]})
+    devicedict.update({DISK_SERIAL_NUMBER:diskdata[DISK_SERIAL_NUMBER]})
+    devicedict.update({DISK_BUS_TYPE:diskdata[DISK_BUS_TYPE]})
 
 def get_disks():
     # Try WMIC first.

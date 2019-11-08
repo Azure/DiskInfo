@@ -79,13 +79,13 @@ def parseLog(logdata, conffile, byteswap):
     return retdict
 
 
-def outputData(nodeDict, resultFolder, outputToScreen):
-    resultFile = "diskData{0}.json".format(int(nodeDict['DeviceId']))
+def outputData(dict, resultFolder, outputToScreen):
+    resultFile = "diskData{0}.json".format(int(dict['DeviceId']))
 
     if (outputToScreen):
-        print(json.dumps(nodeDict, indent=2))
+        print(json.dumps(dict, indent=2))
     else:
-        logging.info(json.dumps(nodeDict, indent=2))
+        logging.info(json.dumps(dict, indent=2))
         with open(os.path.join(resultFolder, resultFile), 'w') as f:
-            json.dump(nodeDict, f)
+            json.dump(dict, f)
 

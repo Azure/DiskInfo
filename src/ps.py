@@ -33,7 +33,7 @@ def parse_MSFT_PhysicalDisk_output(text):
     return result
 
 def get_disks_ps():
-    proc = subprocess.Popen(PS_DISK_CMD, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(PS_DISK_CMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     errcode = proc.returncode
     if (not errcode):

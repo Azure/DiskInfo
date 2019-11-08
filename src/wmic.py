@@ -44,7 +44,7 @@ def parse_wmic_output(text):
     return result
 
 def get_disks_wmic():
-    proc = subprocess.Popen(WMIC_DISK_CMD.split(), stdout=subprocess.PIPE)
+    proc = subprocess.Popen(WMIC_DISK_CMD.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     errcode = proc.returncode
     if (not errcode):

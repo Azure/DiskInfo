@@ -6,7 +6,7 @@ import sys
 import time
 import logging
 
-from optparse       import OptionParser
+from argparse       import ArgumentParser
 from .constants     import *
 from .discovery     import *
 from .nvme          import storeNVMeDevice
@@ -20,6 +20,18 @@ from .datahandle    import outputData
 logging.basicConfig(level=logging.ERROR)
 #logging.basicConfig(level=logging.CRITICAL)
 
+
+def dumpDataForDisk(diskNum, diskNumList):
+    if (diskNumList is None):
+        # No list was passed. Print data for all disks.
+        return True
+    else:
+        for passedDiskNum in diskNumList:
+            if (diskNum == int(passedDiskNum)):
+                # This disk was in the passed in list.
+                return True
+        return False
+
 def collectDiskInfo(classifier):
 
     # Capture start time for performance measurement debug.
@@ -27,20 +39,22 @@ def collectDiskInfo(classifier):
     
     # Setup options and arguments.
     usage = "python runner.py outputDirectory [options]"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-o", "--output", action="store_true", dest="output", help="Output disk data only to screen")
-    (options, args) = parser.parse_args()
-    
-    resultFolder = '.'
+    parser = ArgumentParser(description=usage)
+    parser.add_argument("file", default=".", nargs="?")
+    parser.add_argument("-d", "--device", action="store", dest="dev", nargs="*", help="Only output data for specified disk number(s)")
+    parser.add_argument("-l", "--list", action="store_true", dest="list", help="Output list of storage devices on the node")
+    parser.add_argument("-o", "--output", action="store_true", dest="output", help="Output disk data to screen only")
+    options = parser.parse_args()
     
     if (options.output):
         # Output mode pushes only final result to stdout
         logging.basicConfig(level=logging.CRITICAL)
-    elif (len(sys.argv) > 1):
-        resultFolder = sys.argv[1]
     
     # Query the disks on the node.
     disks = get_disks()
+    
+    if (options.list):
+        print ("%12s %30s %5s %30s" % ("Disk Number", "Model", "Bus", "Serial Number"))
     
     # Parse disk data one at a time.
     for disk in disks:
@@ -48,12 +62,20 @@ def collectDiskInfo(classifier):
         bus = int(disk[DISK_BUS_TYPE])
         mnfgr = disk[DISK_MANUFACTURER]
         diskNumber = int(disk[DISK_OSDISK])
+        serialNumber = disk[DISK_SERIAL_NUMBER]
         drive = (model, bus, mnfgr)
+        
+        if (options.list):
+            print ("%12d %30s %5s %30s" % (diskNumber, model, BUS_TYPE_NAMES[bus], serialNumber))
+            continue
+
+        if (not dumpDataForDisk(diskNumber, options.dev)):
+            continue
         
         # Re-classify this drive to account for any bit flips in WMIC data.
         itsa = classifier(drive)
         logging.debug("itsa {0}".format(itsa))
-            
+
         if itsa is not None:
             result = itsa()
             vendor = result[0]
@@ -68,7 +90,7 @@ def collectDiskInfo(classifier):
                 storeATADevice(diskNumber, model, deviceDict, drive, result)
     
             # Output the disk data.
-            outputData(deviceDict, resultFolder, options.output)
+            outputData(deviceDict, options.file, options.output)
 
     # Capture end time for performance measurement debug.
     tEnd = time.time()
