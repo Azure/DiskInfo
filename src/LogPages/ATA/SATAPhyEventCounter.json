@@ -4,9 +4,384 @@
     "Attributes" :
     [
         {
-            "Name" : "CounterIdAndValueBlob",
+            "Name" : "CounterIdAndValueBlob0",
             "Offset" : 4,
-            "Size" : 508,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob1",
+            "Offset" : 12,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob2",
+            "Offset" : 20,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob3",
+            "Offset" : 28,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob4",
+            "Offset" : 36,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob5",
+            "Offset" : 44,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob6",
+            "Offset" : 52,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob7",
+            "Offset" : 60,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob8",
+            "Offset" : 68,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob9",
+            "Offset" : 76,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob10",
+            "Offset" : 84,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob11",
+            "Offset" : 92,
+            "Size" : 8,
+            "Datatype" : "int"
+        },{
+            "Name" : "CounterIdAndValueBlob12",
+            "Offset" : 100,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob13",
+            "Offset" : 108,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob14",
+            "Offset" : 116,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob15",
+            "Offset" : 124,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob16",
+            "Offset" : 132,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob17",
+            "Offset" : 140,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob18",
+            "Offset" : 148,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob19",
+            "Offset" : 156,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob20",
+            "Offset" : 164,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob21",
+            "Offset" : 172,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob22",
+            "Offset" : 180,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob23",
+            "Offset" : 188,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob24",
+            "Offset" : 196,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob25",
+            "Offset" : 204,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob26",
+            "Offset" : 212,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob27",
+            "Offset" : 220,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob28",
+            "Offset" : 228,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob29",
+            "Offset" : 236,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob30",
+            "Offset" : 244,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob31",
+            "Offset" : 252,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob32",
+            "Offset" : 260,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob33",
+            "Offset" : 268,
+            "Size" : 8,
+            "Datatype" : "int"
+        },{
+            "Name" : "CounterIdAndValueBlob34",
+            "Offset" : 276,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob35",
+            "Offset" : 284,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob36",
+            "Offset" : 292,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob37",
+            "Offset" : 300,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob38",
+            "Offset" : 308,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob39",
+            "Offset" : 316,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob40",
+            "Offset" : 324,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob41",
+            "Offset" : 332,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob42",
+            "Offset" : 340,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob43",
+            "Offset" : 348,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob44",
+            "Offset" : 356,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob45",
+            "Offset" : 364,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob46",
+            "Offset" : 372,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob47",
+            "Offset" : 380,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob48",
+            "Offset" : 388,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob49",
+            "Offset" : 396,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob50",
+            "Offset" : 404,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob51",
+            "Offset" : 412,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob52",
+            "Offset" : 420,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob53",
+            "Offset" : 428,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob54",
+            "Offset" : 436,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob55",
+            "Offset" : 444,
+            "Size" : 8,
+            "Datatype" : "int"
+        },{
+            "Name" : "CounterIdAndValueBlob56",
+            "Offset" : 452,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob57",
+            "Offset" : 460,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob58",
+            "Offset" : 468,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob59",
+            "Offset" : 476,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob60",
+            "Offset" : 484,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob61",
+            "Offset" : 492,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob62",
+            "Offset" : 500,
+            "Size" : 8,
+            "Datatype" : "int"
+        },
+        {
+            "Name" : "CounterIdAndValueBlob63",
+            "Offset" : 508,
+            "Size" : 4,
             "Datatype" : "int"
         }
     ]

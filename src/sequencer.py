@@ -13,6 +13,9 @@ from .nvme          import storeNVMeDevice
 from .ata           import storeATADevice
 from .datahandle    import outputData
 
+REV_MAJOR = 1
+REV_MINOR = 0
+
 # Uncomment the appropriate logging level to control output verbosity.
 #logging.basicConfig(level=logging.DEBUG)
 #logging.basicConfig(level=logging.INFO)
@@ -41,14 +44,21 @@ def collectDiskInfo(classifier):
     usage = "python runner.py outputDirectory [options]"
     parser = ArgumentParser(description=usage)
     parser.add_argument("file", default=".", nargs="?")
-    parser.add_argument("-d", "--device", action="store", dest="dev", nargs="*", help="Only output data for specified disk number(s)")
-    parser.add_argument("-l", "--list", action="store_true", dest="list", help="Output list of storage devices on the node")
-    parser.add_argument("-o", "--output", action="store_true", dest="output", help="Output disk data to screen only")
+    parser.add_argument("-d", "--device", action="store", dest="dev", nargs="*", help="Only output data for specified disk number(s).")
+    parser.add_argument("-l", "--list", action="store_true", dest="list", help="Output list of storage devices on the node.")
+    parser.add_argument("-o", "--output", action="store_true", dest="output", help="Output disk data to screen only.")
+    parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Enable verbose output.")
     options = parser.parse_args()
     
     if (options.output):
         # Output mode pushes only final result to stdout
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
         logging.basicConfig(level=logging.CRITICAL)
+    elif (options.verbose):
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        logging.basicConfig(level=logging.DEBUG)
     
     # Query the disks on the node.
     disks = get_disks()
@@ -72,7 +82,7 @@ def collectDiskInfo(classifier):
         if (not dumpDataForDisk(diskNumber, options.dev)):
             continue
         
-        # Re-classify this drive to account for any bit flips in WMIC data.
+        # Classify this drive to understand vendor and available log pages.
         itsa = classifier(drive)
         logging.debug("itsa {0}".format(itsa))
 
@@ -80,17 +90,20 @@ def collectDiskInfo(classifier):
             result = itsa()
             vendor = result[0]
             bus = result[1]
-            deviceDict = {}
+            vu_log_function = result[2]
             logging.debug("Vendor = {0}, bus = {1} = {2}".format(vendor, bus, BUS_TYPE_NAMES[bus]))
-                
-            storeDiskData(disk, deviceDict)
+            
+            device_dict = {}
+            device_dict.update({"REV_MAJOR":REV_MAJOR})
+            device_dict.update({"REV_MINOR":REV_MINOR})
+            storeDiskData(disk, device_dict)
             if bus == BUS_TYPE_NVME:
-                storeNVMeDevice(diskNumber, model, deviceDict, drive, result)
+                storeNVMeDevice(diskNumber, model, device_dict, drive, vu_log_function)
             elif bus == BUS_TYPE_SATA:
-                storeATADevice(diskNumber, model, deviceDict, drive, result)
+                storeATADevice(diskNumber, model, device_dict, drive, vu_log_function)
     
             # Output the disk data.
-            outputData(deviceDict, options.file, options.output)
+            outputData(device_dict, options.file, options.output)
 
     # Capture end time for performance measurement debug.
     tEnd = time.time()

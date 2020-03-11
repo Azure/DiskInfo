@@ -37,6 +37,12 @@ def checkJsonProp(jsonObj, attrStr, attrType, fileName):
         return 1
     return 0
 
+def is_valid_string(string):
+    if (string.startswith("\u0000")):
+        return False
+    else:
+        return True
+
 def parseLog(logdata, conffile, byteswap):
     exitcode, logjson = loadJson(conffile)
     logging.debug("type(exitcode) is {0}, exit code is {1}".format(type(exitcode), exitcode))
@@ -51,8 +57,6 @@ def parseLog(logdata, conffile, byteswap):
         fromNibble = attr["Offset"]*2
         toNibble = (attr["Offset"]*2)+(attr["Size"]*2)
         binary = logdata[fromNibble:toNibble]
-        logging.debug("fromNibble is {0}, toNibble is {1}, attr['Datatype'] is {2}, attr['Name'] is {3}, binary is {4}"
-            .format(fromNibble, toNibble, attr['Datatype'], attr['Name'], binary))
         if attr["Datatype"] == "int":
             try:
                 value = int.from_bytes(unhexlify(binary), byteorder='little')
@@ -63,15 +67,16 @@ def parseLog(logdata, conffile, byteswap):
             try:
                 value = unhexlify(binary).decode('utf-8')
                 
-                if byteswap:
-                    # ATA devices need this char swapping for String fields in Identify...
-                    s = (''.join([ value[x:x+2][::-1] for x in range(0, len(value), 2) ]))
-                else:
-                    s = value
-                
-                attrs.update({attr["Name"]:s})
+                if is_valid_string(value):
+                    if byteswap:
+                        # ATA devices need this char swapping for String fields in Identify...
+                        s = (''.join([ value[x:x+2][::-1] for x in range(0, len(value), 2) ]))
+                    else:
+                        s = value
+                    
+                    attrs.update({attr["Name"]:s})
             except:
-                logging.error("Error parsing string. Binary data is {0}".format(binary))
+                logging.error("Error parsing string for attribute '{0}'. Binary data is {1}".format(str(attr["Name"]), binary))
         else:
             logging.error("Error - Unknown datatype. Datatype is {0}.".format(attr['Datatype']))
     retdict = {}
@@ -79,13 +84,12 @@ def parseLog(logdata, conffile, byteswap):
     return retdict
 
 
-def outputData(dict, resultFolder, outputToScreen):
-    resultFile = "diskData{0}.json".format(int(dict['DeviceId']))
-
+def outputData(dict, result_folder, outputToScreen):
     if (outputToScreen):
         print(json.dumps(dict, indent=2))
     else:
+        result_file = "diskData{0}.json".format(int(dict['DeviceId']))
         logging.info(json.dumps(dict, indent=2))
-        with open(os.path.join(resultFolder, resultFile), 'w') as f:
+        with open(os.path.join(result_folder, result_file), 'w') as f:
             json.dump(dict, f)
 

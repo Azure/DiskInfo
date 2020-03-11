@@ -53,12 +53,11 @@ def GetATADeviceLog(diskNumber, logId, page, isSMART):
         return GetATAGPLLog(diskNumber, logId, page, ATA_READ_LOG_EXT)
 
 
-def storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, itsaresult, fwRev):
-    GETVULOGS = itsaresult[2]
-    logging.debug("GETVULOGS {0}".format(GETVULOGS))
-    if GETVULOGS is not None:
-        logging.debug("calling GETVULOGS({0}, {1}, {2})".format(drive,model,fwRev))
-        vuLogs = GETVULOGS(drive, model, fwRev)
+def storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev):
+    logging.debug("vu_log_function {0}".format(vu_log_function))
+    if vu_log_function is not None:
+        logging.debug("calling vu_log_function({0}, {1}, {2})".format(drive,model,fwRev))
+        vuLogs = vu_log_function(drive, model, fwRev)
         logging.debug("vuLogs {0}".format(vuLogs))
         if vuLogs is not None:
             logsFetched = 0
@@ -231,7 +230,7 @@ def storeATAIdentifyInformation(diskNumber, devicedict):
     return fwRev, logSupport
 
 
-def storeATADevice(diskNumber, model, devicedict, drive, itsaresult):
+def storeATADevice(diskNumber, model, devicedict, drive, vu_log_function):
 
     # Read Identify Information
     fwRev, logSupport = storeATAIdentifyInformation(diskNumber, devicedict)
@@ -240,4 +239,4 @@ def storeATADevice(diskNumber, model, devicedict, drive, itsaresult):
     storeATADeviceStandardLogs(diskNumber, devicedict, logSupport)
 
     # Read Vendor Unique Logs
-    storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, itsaresult, fwRev)
+    storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev)

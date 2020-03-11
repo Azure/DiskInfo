@@ -34,12 +34,11 @@ NVME_LOG_PAGE_VU_END                        = 0xFF
 # NVMe Log Bit Parsers
 ACTIVE_FIRMWARE_INFO_BITMASK                = 0x7
 
-def storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, itsaresult, fwRev):
-    GETVULOGS = itsaresult[2]
-    logging.debug("GETVULOGS {0}".format(GETVULOGS))
-    if GETVULOGS is not None:
-        logging.debug("calling GETVULOGS({0},{1},{2})".format(drive,model,fwRev))
-        vuLogs = GETVULOGS(drive, model, fwRev)
+def storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev):
+    logging.debug("GETVULOGS {0}".format(vu_log_function))
+    if vu_log_function is not None:
+        logging.debug("calling vu_log_function({0},{1},{2})".format(drive,model,fwRev))
+        vuLogs = vu_log_function(drive, model, fwRev)
         logging.debug("vuLogs {0}".format(vuLogs))
         if vuLogs is not None:
             logsFetched = 0
@@ -119,7 +118,7 @@ def storeNVMeIdentifyInformation(diskNumber, devicedict):
     time.sleep(LOG_FETCH_DELAY)
 
 
-def storeNVMeDevice(diskNumber, model, devicedict, drive, itsaresult):
+def storeNVMeDevice(diskNumber, model, devicedict, drive, vu_log_function):
     
     # Read Identify Information
     storeNVMeIdentifyInformation(diskNumber, devicedict)
@@ -128,4 +127,4 @@ def storeNVMeDevice(diskNumber, model, devicedict, drive, itsaresult):
     fwRev = storeNVMeDeviceStandardLogs(diskNumber, devicedict)
 
     # Read Vendor Unique Logs
-    storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, itsaresult, fwRev)
+    storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev)
