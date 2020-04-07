@@ -5,10 +5,12 @@
 import time
 import logging
 
-from binascii       import hexlify, unhexlify
-from .constants     import *
-from .ioctl         import GetNVMeIdentify, GetNVMeLog
-from .datahandle    import parseLog
+from ctypes                     import *
+from .constants                 import *
+from .ioctl                     import GetNVMeIdentify, GetNVMeLog
+from .datahandle                import bin_to_dict, byte_swap_enable
+from .structures.nvme_standard  import *
+
 
 # NVMe Identify CNS Identifiers (must be kept in sync with ioctl.py SCOPE defines)
 CNS_CONTROLLER                              = 0
@@ -34,97 +36,85 @@ NVME_LOG_PAGE_VU_END                        = 0xFF
 # NVMe Log Bit Parsers
 ACTIVE_FIRMWARE_INFO_BITMASK                = 0x7
 
-def storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev):
+def get_fw_rev(device_dict):
+    active_slot = device_dict['FirmwareSlotInformation']['afi']['active']
+    return device_dict['FirmwareSlotInformation']["frs%d" % (active_slot)]
+
+
+def store_nvme_identify(disk_number, devicedict, id_name, id_struct, cns):
+    id_buffer =  GetNVMeIdentify(disk_number, cns)
+    if id_buffer != 0:
+        devicedict.update({id_name:bin_to_dict(id_buffer, id_struct)})
+    time.sleep(LOG_FETCH_DELAY)
+
+
+def store_nvme_log_page(disk_number, devicedict, log_name, log_id, log_struct, cns):
+    log_buffer =  GetNVMeLog(disk_number, log_id, cns)
+    if log_buffer != 0:
+        devicedict.update({log_name:bin_to_dict(log_buffer, log_struct)})
+    time.sleep(LOG_FETCH_DELAY)
+
+
+def store_nvme_vu_log_pages(disk_number, model, devicedict, drive, vu_log_function):
     logging.debug("GETVULOGS {0}".format(vu_log_function))
     if vu_log_function is not None:
-        logging.debug("calling vu_log_function({0},{1},{2})".format(drive,model,fwRev))
-        vuLogs = vu_log_function(drive, model, fwRev)
+        logging.debug("calling vu_log_function({0},{1},{2})".format(drive,model,get_fw_rev(devicedict)))
+        vuLogs = vu_log_function(drive, model, get_fw_rev(devicedict))
         logging.debug("vuLogs {0}".format(vuLogs))
         if vuLogs is not None:
             logsFetched = 0
-            for logpage in vuLogs:
+            for vu_log_data in vuLogs:
                 if (logsFetched <= LOG_VU_MAX):
-                    logging.debug("logpage {0}".format(logpage))
-                    ## logpage should be a tuple or list of length 2 (or 3 when CNS provided)
-                    logpagelen = len(logpage)
-                    if ( (2 <= logpagelen) and (logpagelen < 4) ):
-                        logpageid   = logpage[0]
-                        logpagejson = logpage[1]
-                        if (2 < logpagelen):
-                            cns = logpage[2]
+                    logging.debug("vu_log_data {0}".format(vu_log_data))
+                    logpagelen = len(vu_log_data)
+                    if ((3 <= logpagelen) and (logpagelen <= 4)):
+                        log_name    = vu_log_data[0]
+                        log_id      = vu_log_data[1]
+                        log_struct  = vu_log_data[2]
+                        if (3 < logpagelen):
+                            cns = vu_log_data[3]
                         else:
                             cns = CNS_CONTROLLER
-
-                        if ((NVME_LOG_PAGE_VU_START >= 0xC0) and (logpageid <= NVME_LOG_PAGE_VU_END)):
-                            logbuffer =  GetNVMeLog(diskNumber, logpageid, cns)
+                        
+                        if ((NVME_LOG_PAGE_VU_START >= 0xC0) and (log_id <= NVME_LOG_PAGE_VU_END)):
+                            store_nvme_log_page(disk_number, devicedict, log_name, log_id, log_struct, cns)
                         else:
-                            logging.warning("Log page is not in legal VU range.")
-                            logbuffer = 0
-                        time.sleep(LOG_FETCH_DELAY)
-                        logging.debug("logbuffer {0}".format(logbuffer))
-                        if logbuffer != 0:
-                            logpagejson = logPageDirVu() + logpagejson
-                            logging.debug("enter parseLog {0}".format(logpagejson))
-                            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logpagejson, False))
-                            logging.debug("leave parseLog {0}".format(logpagejson))
-                            logsFetched += 1
+                            logging.warning("LID is not in legal VU range.")
+                        logsFetched += 1
                     else:
-                        logging.warning("Invalid VU log page information provided")
+                        logging.warning("Invalid VU log page tuple provided.")
 
-def storeNVMeDeviceStandardLogs(diskNumber, devicedict):
-    logbuffer =  GetNVMeLog(diskNumber, NVME_LOG_PAGE_HEALTH_INFO, CNS_NAMESPACE)
-    if logbuffer != 0:
-        devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logPageDir()+"NVMe/SMART.json", False))
-    time.sleep(LOG_FETCH_DELAY)
+
+def store_nvme_standard_log_pages(disk_number, devicedict):
+    standard_logs = [ 
+        ("ErrorInformation",        NVME_LOG_PAGE_ERROR_INFO,           ErrorInformation,   CNS_CONTROLLER),
+        ("SMART",                   NVME_LOG_PAGE_HEALTH_INFO,          SmartLog,           CNS_NAMESPACE),
+        ("FirmwareSlotInformation", NVME_LOG_PAGE_FIRMWARE_SLOT_INFO,   FwInfoLog,          CNS_CONTROLLER),
+        ("WCS",                     NVME_LOG_PAGE_WCS_CLOUD_SSD,        WCSLog,             CNS_NAMESPACE)
+        ]
     
-    logbuffer =  GetNVMeLog(diskNumber, NVME_LOG_PAGE_FIRMWARE_SLOT_INFO, CNS_CONTROLLER)
-    if logbuffer != 0:
-        logdata = hexlify(logbuffer).decode('ascii').rstrip()
-        devicedict.update(parseLog(logdata, logPageDir()+"NVMe/FirmwareSlot.json", False))
-        
-        # Extract firmware revision out for later use.
-        AFI = devicedict['FirmwareSlotInformation']['ActiveFirmwareInfo']
-        fwSlot = AFI & ACTIVE_FIRMWARE_INFO_BITMASK
-        fwRevSlots = {
-            1: "FirmwareRevisionSlot1",
-            2: "FirmwareRevisionSlot2",
-            3: "FirmwareRevisionSlot3",
-            4: "FirmwareRevisionSlot4",
-            5: "FirmwareRevisionSlot5",
-            6: "FirmwareRevisionSlot6",
-            7: "FirmwareRevisionSlot7"
-        }
-        fwRev = devicedict['FirmwareSlotInformation'][fwRevSlots.get(fwSlot, "")]
-    else:
-        fwRev = 0
-    time.sleep(LOG_FETCH_DELAY)
+    for log_data in standard_logs:
+        store_nvme_log_page(disk_number, devicedict, log_data[0], log_data[1], log_data[2], log_data[3])
+
+
+def store_nvme_identify_information(disk_number, devicedict):
+    standard_id = [ 
+        ("IdentifyController",  IdCtrl, CNS_CONTROLLER),
+        ("IdentifyNamespace",   IdNs,   CNS_NAMESPACE)
+        ]
     
-    logbuffer =  GetNVMeLog(diskNumber, NVME_LOG_PAGE_WCS_CLOUD_SSD, CNS_NAMESPACE)
-    if logbuffer != 0:
-        devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logPageDir()+"NVMe/WCS.json", False))
-    time.sleep(LOG_FETCH_DELAY)
-    return fwRev
+    for id_data in standard_id:
+        store_nvme_identify(disk_number, devicedict, id_data[0], id_data[1], id_data[2])
 
 
-def storeNVMeIdentifyInformation(diskNumber, devicedict):
-    identifybuffer =  GetNVMeIdentify(diskNumber, CNS_CONTROLLER)
-    if identifybuffer != 0:
-        devicedict.update(parseLog(hexlify(identifybuffer).decode('ascii').rstrip(), logPageDir()+"NVMe/IdCtrl.json", False))
-    time.sleep(LOG_FETCH_DELAY)
-    
-    identifybuffer =  GetNVMeIdentify(diskNumber, CNS_NAMESPACE)
-    if identifybuffer != 0:
-        devicedict.update(parseLog(hexlify(identifybuffer).decode('ascii').rstrip(), logPageDir()+"NVMe/IdNs.json", False))
-    time.sleep(LOG_FETCH_DELAY)
-
-
-def storeNVMeDevice(diskNumber, model, devicedict, drive, vu_log_function):
+def storeNVMeDevice(disk_number, model, devicedict, drive, vu_log_function):
+    byte_swap_enable(False)
     
     # Read Identify Information
-    storeNVMeIdentifyInformation(diskNumber, devicedict)
+    store_nvme_identify_information(disk_number, devicedict)
     
     # Read Standard Logs
-    fwRev = storeNVMeDeviceStandardLogs(diskNumber, devicedict)
+    store_nvme_standard_log_pages(disk_number, devicedict)
 
     # Read Vendor Unique Logs
-    storeNVMeDeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev)
+    store_nvme_vu_log_pages(disk_number, model, devicedict, drive, vu_log_function)

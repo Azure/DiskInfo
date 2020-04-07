@@ -5,13 +5,12 @@
 import time
 import logging
 
-from binascii       import hexlify, unhexlify
-from .constants     import *
-from .ioctl         import GetATAIdentify, GetATASMARTLog, GetATAGPLLog
-from .datahandle    import parseLog
+from binascii                   import hexlify, unhexlify
+from .constants                 import *
+from .ioctl                     import GetATAIdentify, GetATASMARTLog, GetATAGPLLog
+from .datahandle                import bin_to_dict, byte_swap_enable
+from .structures.ata_standard   import *
 
-# ATA Command Opcodes
-ATA_READ_LOG_EXT                = 0x2F
 
 # ATA Log Page Identifiers
 ATA_LOG_DIRECTORY               = 0x00
@@ -44,94 +43,78 @@ SMART_ERR_LOG_BIT               = (0x01 << 2)
 NCQ_BIT                         = (0x01 << 3)
 SATA_PHY_EVENT_COUNT_BIT        = (0x01 << 4)
 
-def GetATADeviceLog(diskNumber, logId, page, isSMART):
-    if (isSMART):
+def get_fw_rev(device_dict):
+    return device_dict["Identify"]["firmware_revision"]
+
+
+def store_ata_log_page(disk_number, devicedict, log_name, log_id, log_struct, page, isSmart):
+    if (isSmart):
         # SMART Logs are fetched using Property Standard Query IOCTL.
-        return GetATASMARTLog(diskNumber, logId)
+        log_buffer = GetATASMARTLog(disk_number, log_id)
     else:
         # GPL Logs are fetched using pass through IOCTL and thus must pass the command opcode.
-        return GetATAGPLLog(diskNumber, logId, page, ATA_READ_LOG_EXT)
+        log_buffer = GetATAGPLLog(disk_number, log_id, page)
+
+    if log_buffer != 0:
+        devicedict.update({log_name:bin_to_dict(log_buffer, log_struct)})
+    time.sleep(LOG_FETCH_DELAY)
 
 
-def storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev):
+def store_ata_vu_log_pages(disk_number, model, devicedict, drive, vu_log_function):
     logging.debug("vu_log_function {0}".format(vu_log_function))
     if vu_log_function is not None:
-        logging.debug("calling vu_log_function({0}, {1}, {2})".format(drive,model,fwRev))
-        vuLogs = vu_log_function(drive, model, fwRev)
+        logging.debug("calling vu_log_function({0}, {1}, {2})".format(drive,model,get_fw_rev(devicedict)))
+        vuLogs = vu_log_function(drive, model, get_fw_rev(devicedict))
         logging.debug("vuLogs {0}".format(vuLogs))
         if vuLogs is not None:
             logsFetched = 0
-            for logpage in vuLogs:
+            for vu_log_data in vuLogs:
                 if (logsFetched <= LOG_VU_MAX):
                     logging.debug("logpage {0}".format(logpage))
-                    # logpage should be a tuple or list of length 3
+                    # logpage should be a tuple or list of length 4
                     logpagelen = len(logpage)
-                    if ( (3 <= logpagelen) and (logpagelen < 4) ):
-                        logpageid   = logpage[0]
-                        logpagejson = logpage[1]
-                        isSmart     = logpage[2]
+                    if (logpagelen == 4):
+                        log_name    = vu_log_data[0]
+                        log_id      = vu_log_data[1]
+                        log_struct  = vu_log_data[2]
+                        is_smart     = vu_log_data[3]
                         
-                        if ((logpageid >= ATA_LOG_VU_START) and (logpageid <= ATA_LOG_VU_END)):
-                            logbuffer =  GetATADeviceLog(diskNumber, logpageid, 0, isSmart)
+                        if ((log_id >= ATA_LOG_VU_START) and (log_id <= ATA_LOG_VU_END)):
+                            store_ata_log_page(disk_number, devicedict,
+                                                log_name, log_id, log_struct, 0, is_smart)
                         else:
                             logging.warning("Log page is not in legal VU range.")
-                            logbuffer = 0
-                        
-                        time.sleep(LOG_FETCH_DELAY)
-                        logging.debug("logbuffer {0}".format(logbuffer))
-                        if logbuffer != 0:
-                            logpagejson = logPageDirVu() + logpagejson
-                            logging.debug("enter parseLog {0}".format(logpagejson))
-                            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logpagejson, True))
-                            logging.debug("leave parseLog {0}".format(logpagejson))
-                            logsFetched += 1
+                        logsFetched += 1
                     else:
                         logging.warning("Invalid VU log page information provided")
 
 
-def storeATADeviceGPLLogs(diskNumber, devicedict, logSupport):
-    isSmart = False
+def store_ata_standard_log_pages(disk_number, devicedict):
+    log_support = getLogSupportFromIdentify(devicedict)
+    standard_logs = []
     
-    logbuffer =  GetATADeviceLog(diskNumber, ATA_LOG_DIRECTORY, 0, isSmart)
-    if logbuffer != 0:
-        devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logPageDir()+"ATA/Directory.json", True))
-    time.sleep(LOG_FETCH_DELAY)
-    
-    if (logSupport & NCQ_BIT):
-        logbuffer =  GetATADeviceLog(diskNumber, ATA_LOG_NCQ_CMD_ERROR_LOG, 0, isSmart)
-        if logbuffer != 0:
-            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logPageDir()+"ATA/NCQCmdErrLog.json", True))
-        time.sleep(LOG_FETCH_DELAY)
-    
-    if (logSupport & SATA_PHY_EVENT_COUNT_BIT):
-        logbuffer =  GetATADeviceLog(diskNumber, ATA_LOG_SATA_PHY_EVENT_COUNTER, 0, isSmart)
-        if logbuffer != 0:
-            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logPageDir()+"ATA/SATAPhyEventCounter.json", True))
-        time.sleep(LOG_FETCH_DELAY)
-
-
-def storeATADeviceSMARTLogs(diskNumber, devicedict, logSupport):
-    isSmart = True
-    
-    if (logSupport & SMART_ERR_LOG_BIT):
-        logbuffer =  GetATADeviceLog(diskNumber, ATA_LOG_SMART_ERROR_SUM, 0, isSmart)
-        if logbuffer != 0:
-            devicedict.update(parseLog(hexlify(logbuffer).decode('ascii').rstrip(), logPageDir()+"ATA/SMARTError.json", True))
-        time.sleep(LOG_FETCH_DELAY)    
+    if (log_support & GPL_BIT):
+        log_entry = ("LogDirectory",    ATA_LOG_DIRECTORY,  LogDirectory,   0,  False)
+        standard_logs.append(log_entry)
+        if (log_support & NCQ_BIT):
+            log_entry = ("NCQErrorLog", ATA_LOG_NCQ_CMD_ERROR_LOG,  NCQErrorLog,    0,  True)
+            standard_logs.append(log_entry)
+        if (log_support & SATA_PHY_EVENT_COUNT_BIT):
+            log_entry = ("PHYEventCount",   ATA_LOG_SATA_PHY_EVENT_COUNTER, PHYEventCount,  0,  True)
+            standard_logs.append(log_entry)
     else:
-        logging.debug("SMART Err Log not supported on disk {0}".format(diskNumber))
+        logging.debug("GPL not supported on disk {0}".format(disk_number))
 
-
-def storeATADeviceStandardLogs(diskNumber, devicedict, logSupport):
-    if (logSupport & GPL_BIT):
-        storeATADeviceGPLLogs(diskNumber, devicedict, logSupport)
+    if (log_support & SMART_FEAT_SET_BIT):
+        if (log_support & SMART_ERR_LOG_BIT):
+            log_entry = ("SmartError",  ATA_LOG_SMART_ERROR_SUM,    SMARTError, 0,  True)
+            standard_logs.append(log_entry)
     else:
-        logging.debug("GPL not supported on disk {0}".format(diskNumber))
-
-    if (logSupport & SMART_FEAT_SET_BIT):
-        storeATADeviceSMARTLogs(diskNumber, devicedict, logSupport)
-    else:
-        logging.debug("SMART not supported on disk {0}".format(diskNumber))
+        logging.debug("SMART not supported on disk {0}".format(disk_number))
+    
+    for log_data in standard_logs:
+        store_ata_log_page(disk_number, devicedict,
+                            log_data[0], log_data[1], log_data[2], log_data[3], log_data[4])
 
 
 def IdentifyWord76Valid(word76):
@@ -168,13 +151,13 @@ def IdentifyWord85And86And87Valid(word87):
 
 def getLogSupportFromIdentify(devicedict):
     logSupport = 0
-    word76 = devicedict['AtaIdentify']['SATASupport']
-    word82 = devicedict['AtaIdentify']['CmdsAndFeaturesSupported1']
-    word83 = devicedict['AtaIdentify']['CmdsAndFeaturesSupported2']
-    word84 = devicedict['AtaIdentify']['CmdsAndFeaturesSupported3']
-    word85 = devicedict['AtaIdentify']['CmdsAndFeaturesSupported4']
-    word86 = devicedict['AtaIdentify']['CmdsAndFeaturesSupported5']
-    word87 = devicedict['AtaIdentify']['CmdsAndFeaturesSupported6']
+    word76 = devicedict['Identify']['sata_features_supported']
+    word82 = devicedict['Identify']['cmds_features_supported0'][0]
+    word83 = devicedict['Identify']['cmds_features_supported0'][1]
+    word84 = devicedict['Identify']['cmds_features_supported0'][2]
+    word85 = devicedict['Identify']['cmds_features_supported_enabled0'][0]
+    word86 = devicedict['Identify']['cmds_features_supported_enabled0'][1]
+    word87 = devicedict['Identify']['cmds_features_supported_enabled0'][2]
     
     word76valid = IdentifyWord76Valid(word76)
     words82and83valid = IdentifyWord82And83Valid(word83)
@@ -211,32 +194,21 @@ def getLogSupportFromIdentify(devicedict):
     return logSupport
 
 
-def storeATAIdentifyInformation(diskNumber, devicedict):
-    identifybuffer =  GetATAIdentify(diskNumber)
-    if identifybuffer != 0:
-        logdata = hexlify(identifybuffer).decode('ascii').rstrip()
-        devicedict.update(parseLog(logdata, logPageDir()+"ATA/Id.json", True))
-        
-        # Extract firmware revision out for later use.
-        fwRev = devicedict['AtaIdentify']['FirmwareRevision']
-        
-        logSupport = getLogSupportFromIdentify(devicedict)
-
-    else:
-        fwRev = 0
-        logSupport = 0
+def store_ata_identify_information(disk_number, devicedict):
+    identify_buffer =  GetATAIdentify(disk_number)
+    if identify_buffer != 0:
+        devicedict.update({"Identify":bin_to_dict(identify_buffer, Id)})
     time.sleep(LOG_FETCH_DELAY)
+
+
+def storeATADevice(disk_number, model, devicedict, drive, vu_log_function):
+    byte_swap_enable(True)
     
-    return fwRev, logSupport
-
-
-def storeATADevice(diskNumber, model, devicedict, drive, vu_log_function):
-
     # Read Identify Information
-    fwRev, logSupport = storeATAIdentifyInformation(diskNumber, devicedict)
+    store_ata_identify_information(disk_number, devicedict)
     
     # Read Standard Logs
-    storeATADeviceStandardLogs(diskNumber, devicedict, logSupport)
+    store_ata_standard_log_pages(disk_number, devicedict)
 
     # Read Vendor Unique Logs
-    storeATADeviceVendorUniqueLogs(diskNumber, model, devicedict, drive, vu_log_function, fwRev)
+    store_ata_vu_log_pages(disk_number, model, devicedict, drive, vu_log_function)

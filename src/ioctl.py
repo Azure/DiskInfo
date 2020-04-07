@@ -82,6 +82,9 @@ NVME_DATA_TYPE_LOG_PAGE = 2
 ATA_DATA_TYPE_IDENTIFY = 1
 ATA_DATA_TYPE_LOG_PAGE = 2
 
+# ATA Command Opcodes
+ATA_READ_LOG_EXT                = 0x2F
+
 ATA_FLAGS_DRDY_REQUIRED = (1 << 0)
 ATA_FLAGS_DATA_IN       = (1 << 1)
 ATA_FLAGS_DATA_OUT      = (1 << 2)
@@ -242,9 +245,9 @@ class DeviceIoControl(object):
             windll.kernel32.CloseHandle(self._fhandle)
 
 
-def GetNVMeLog(diskNumber, logid, scope):
+def GetNVMeLog(disk_number, logid, scope):
     
-    filehandle = (r"\\.\PhysicalDrive" + str(diskNumber))
+    filehandle = (r"\\.\PhysicalDrive" + str(disk_number))
     specificdata = STORAGE_PROTOCOL_SPECIFIC_DATA()
     
     if (scope == ADAPTER_SCOPE):
@@ -275,12 +278,12 @@ def GetNVMeLog(diskNumber, logid, scope):
     else:
         error = windll.kernel32.GetLastError()
         logging.error('GetNVMeLog({0}, 0x{1}, {2}) Failed to IOCTL_STORAGE_QUERY_PROPERTY {3} . GetLastError(): {4} - {5}'
-            .format(diskNumber, hex(logid), scope, dctl, error, FormatError(error)))
+            .format(disk_number, hex(logid), scope, dctl, error, FormatError(error)))
         return 0
 
 
-def GetNVMeIdentify(diskNumber, scope):
-    filehandle = (r"\\.\PhysicalDrive" + str(diskNumber))
+def GetNVMeIdentify(disk_number, scope):
+    filehandle = (r"\\.\PhysicalDrive" + str(disk_number))
     specificdata = STORAGE_PROTOCOL_SPECIFIC_DATA()
     
     if (scope == ADAPTER_SCOPE):
@@ -310,12 +313,12 @@ def GetNVMeIdentify(diskNumber, scope):
     else:
         error = windll.kernel32.GetLastError()
         logging.error('GetNVMeIdentify({0}, {1}) Failed to IOCTL_STORAGE_QUERY_PROPERTY {2}. GetLastError(): {3} - {4}'
-            .format(diskNumber, scope, dctl, error, FormatError(error)))
+            .format(disk_number, scope, dctl, error, FormatError(error)))
         return 0
 
 
-def ATAPassThroughDirect(diskNumber, flags, feature, lbacount, lbanumber2, lbanumber, opcode):
-    filehandle = (r"\\.\PhysicalDrive" + str(diskNumber))
+def ATAPassThroughDirect(disk_number, flags, feature, lbacount, lbanumber2, lbanumber, opcode):
+    filehandle = (r"\\.\PhysicalDrive" + str(disk_number))
     
     specificdata = ATA_PASS_THROUGH_DIRECT()
     specificdata.Length = ctypes.sizeof(ATA_PASS_THROUGH_DIRECT) - MAX_LOG_SIZE
@@ -338,19 +341,19 @@ def ATAPassThroughDirect(diskNumber, flags, feature, lbacount, lbanumber2, lbanu
     else:
         error = windll.kernel32.GetLastError()
         logging.error('GetATAIdentify({0}) Failed to IOCTL_ATA_PASS_THROUGH_DIRECT {1}. GetLastError(): {2} - {3}'
-            .format(diskNumber, dctl, error, FormatError(error)))
+            .format(disk_number, dctl, error, FormatError(error)))
         return 0
 
 
-def GetATAGPLLog(diskNumber, logid, page, opcode):
+def GetATAGPLLog(disk_number, logid, page):
     
     flags = (ATA_FLAGS_DRDY_REQUIRED | ATA_FLAGS_DATA_IN | ATA_FLAGS_48BIT_COMMAND)
-    return ATAPassThroughDirect(diskNumber, flags, 0, 1, logid, page, opcode)
+    return ATAPassThroughDirect(disk_number, flags, 0, 1, logid, page, ATA_READ_LOG_EXT)
 
 
-def GetATASMARTLog(diskNumber, page):
+def GetATASMARTLog(disk_number, page):
     
-    filehandle = (r"\\.\PhysicalDrive" + str(diskNumber))
+    filehandle = (r"\\.\PhysicalDrive" + str(disk_number))
     specificdata = STORAGE_PROTOCOL_SPECIFIC_DATA()
     
     specificdata.PropertyId = STORAGE_DEVICE_PROTOCOL_SPECIFIC_PROPERTY
@@ -377,12 +380,12 @@ def GetATASMARTLog(diskNumber, page):
     else:
         error = windll.kernel32.GetLastError()
         logging.error('GetATALog({0}, 0x{1}) Failed to IOCTL_STORAGE_QUERY_PROPERTY {2}. GetLastError(): {3} - {4}'
-            .format(diskNumber, page, dctl, error, FormatError(error)))
+            .format(disk_number, page, dctl, error, FormatError(error)))
         return 0
 
 
-def GetATAIdentify(diskNumber):
-    filehandle = (r"\\.\PhysicalDrive" + str(diskNumber))
+def GetATAIdentify(disk_number):
+    filehandle = (r"\\.\PhysicalDrive" + str(disk_number))
     specificdata = STORAGE_PROTOCOL_SPECIFIC_DATA()
     
     specificdata.PropertyId = STORAGE_DEVICE_PROTOCOL_SPECIFIC_PROPERTY
@@ -407,5 +410,5 @@ def GetATAIdentify(diskNumber):
     else:
         error = windll.kernel32.GetLastError()
         logging.error('GetATAIdentify({0}) Failed to IOCTL_STORAGE_QUERY_PROPERTY {1}. GetLastError(): {2} - {3}'
-            .format(diskNumber, dctl, error, FormatError(error)))
+            .format(disk_number, dctl, error, FormatError(error)))
         return 0

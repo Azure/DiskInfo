@@ -13,7 +13,7 @@ from .nvme          import storeNVMeDevice
 from .ata           import storeATADevice
 from .datahandle    import outputData
 
-REV_MAJOR = 1
+REV_MAJOR = 2
 REV_MINOR = 0
 
 # Uncomment the appropriate logging level to control output verbosity.
@@ -71,15 +71,15 @@ def collectDiskInfo(classifier):
         model = disk[DISK_MODEL]
         bus = int(disk[DISK_BUS_TYPE])
         mnfgr = disk[DISK_MANUFACTURER]
-        diskNumber = int(disk[DISK_OSDISK])
+        disk_number = int(disk[DISK_OSDISK])
         serialNumber = disk[DISK_SERIAL_NUMBER]
         drive = (model, bus, mnfgr)
         
         if (options.list):
-            print ("%12d %30s %5s %30s" % (diskNumber, model, BUS_TYPE_NAMES[bus], serialNumber))
+            print ("%12d %30s %5s %30s" % (disk_number, model, BUS_TYPE_NAMES[bus], serialNumber))
             continue
 
-        if (not dumpDataForDisk(diskNumber, options.dev)):
+        if (not dumpDataForDisk(disk_number, options.dev)):
             continue
         
         # Classify this drive to understand vendor and available log pages.
@@ -98,9 +98,9 @@ def collectDiskInfo(classifier):
             device_dict.update({"REV_MINOR":REV_MINOR})
             storeDiskData(disk, device_dict)
             if bus == BUS_TYPE_NVME:
-                storeNVMeDevice(diskNumber, model, device_dict, drive, vu_log_function)
+                storeNVMeDevice(disk_number, model, device_dict, drive, vu_log_function)
             elif bus == BUS_TYPE_SATA:
-                storeATADevice(diskNumber, model, device_dict, drive, vu_log_function)
+                storeATADevice(disk_number, model, device_dict, drive, vu_log_function)
     
             # Output the disk data.
             outputData(device_dict, options.file, options.output)

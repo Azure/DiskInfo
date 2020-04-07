@@ -1,3 +1,4 @@
+from ctypes import *
 from ..constants import *
 
 NVME_LOG_PAGE_VU1   = 0xD0
@@ -7,26 +8,67 @@ NVME_LOG_PAGE_VU3   = 0xD2
 modelABC            = "ABC"
 firmwareXYZ         = "XYZ12345"
 
+class ExampleLog(Structure):
+    """Example Log Page"""
+    _pack_ = 1
+    _fields_ = [
+        ('field1', c_uint32),
+        ('field2', c_uint32)
+    ]
+
+class ExampleLogModelSpecific1(Structure):
+    """Example Log Page"""
+    _pack_ = 1
+    _fields_ = [
+        ('field1', c_uint32),
+        ('field2', c_uint32*4)
+    ]
+
+class ExampleLogModelSpecific2(Structure):
+    """Example Log Page"""
+    _pack_ = 1
+    _fields_ = [
+        ('field1', c_uint32),
+        ('field2', c_uint32*8)
+    ]
+
+class ExampleLogFirmwareSpecific1(Structure):
+    """Example Log Page"""
+    _pack_ = 1
+    _fields_ = [
+        ('field1', c_uint32),
+        ('field2', c_uint32*8)
+    ]
+
+class ExampleLogFirmwareSpecific2(Structure):
+    """Example Log Page"""
+    _pack_ = 1
+    _fields_ = [
+        ('field1', c_uint32),
+        ('field2', c_uint32),
+        ('field3', c_uint32*8)
+    ]
+
 def GETVULOGSNVME(drive, modelNumber, firmware):
     result = [ 
-        ( NVME_LOG_PAGE_VU1, "ExampleVendor/VU1.json" )
+        ("Example1",    NVME_LOG_PAGE_VU1,  ExampleLog)
         ]
     
     # Logs that change byte layout based on model number.
     if (modelNumber == modelABC):
-        json = "ExampleVendor/VU2_ABC.json"
+        struct = ExampleLogModelSpecific1
     else:
-        json = "ExampleVendor/VU2_notABC.json"
-    logpage = (NVME_LOG_PAGE_VU2, json)
-    result.append(logpage)
+        struct = ExampleLogModelSpecific2
+    log_entry = ("Example2", NVME_LOG_PAGE_VU2, struct)
+    result.append(log_entry)
     
     # Logs that change byte layout based on firmware rev.
     if (firmware == firmwareXYZ):
-        json = "ExampleVendor/VU3_XYZ.json"
+        struct = ExampleLogFirmwareSpecific1
     else:
-        json = "ExampleVendor/VU3_notXYZ.json"
-    logpage = (NVME_LOG_PAGE_VU3, json)
-    result.append(logpage)
+        struct = ExampleLogFirmwareSpecific2
+    log_entry = ("Example3", NVME_LOG_PAGE_VU3, struct)
+    result.append(log_entry)
     
     return(result);
 
