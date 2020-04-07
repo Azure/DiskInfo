@@ -70,11 +70,7 @@ class ErrorEntry(Structure):
 class ErrorLog(Structure):
     _pack_ = 1
     _fields_ = [
-        ('first_cmd', ErrorEntry),
-        ('second_cmd', ErrorEntry),
-        ('third_cmd', ErrorEntry),
-        ('fourth_cmd', ErrorEntry),
-        ('fifth_cmd', ErrorEntry),
+        ('cmd', ErrorEntry*5),
         ('error_data_structure', ErrorDataStructure)
     ]
 
@@ -84,7 +80,8 @@ class SMARTError(Structure):
     _fields_ = [
         ('version', c_uint8),
         ('index', c_uint8),
-        ('error_log', ErrorLog),
+        ('error_log', ErrorLog*5),
+        ('device_error_count', c_uint16),
         ('reserved0', c_uint8*57),
         ('checksum', c_uint8),
     ]
