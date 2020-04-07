@@ -104,4 +104,7 @@ venv.bak/
 .mypy_cache/
 
 # Output file
-diskData.json
+*.json
+
+# Temp files
+*.tmp
