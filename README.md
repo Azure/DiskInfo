@@ -25,13 +25,21 @@ The tool will automatically scan for physical storage devices on the execution s
   ```
   python runner.py
   ```
-To output to a specific directory, a parameter can be provided like so:
+To output to a specific directory:
   ```
-  python runner.py example/output/dir
+  python runner.py <dir>
   ```
-To output to the screen, output option can be provided like so:
+To output to the screen:
   ```
   python runner.py -o
+  ```
+To list discovered devices:
+  ```
+  python runner.py -l
+  ```
+To output data for a single device:
+  ```
+  python runner.py -d <#>
   ```
 # Compatibility
 The tool is currently only compatible with Windows. It relies on WMI infrastructure with WMIC or PowerShell front end for discovering disk on the current machine. It only understands how to collect telemetry for NVMe and ATA storage devices.
@@ -40,4 +48,4 @@ The tool is currently only compatible with Windows. It relies on WMI infrastruct
 To add vendor specific telemetry data, the following changes must occur:
   1. Update src/classify.py to ensure the proper function is returned from vendor specific model file (e.g. src.Models.ExampleVendorFile.NVME) based on the Product ID, Bus Type, and Manufacturer info collected by WMIC. This should only need to be done once per model (i.e. not for each additional log page added).
   2. Update vendor specific model file (e.g. src/Models/ExampleVendorFile.py) to return a tuple of supported vendor unique log pages based on the function provided in step 1, the model number, and the firmware revision.
-  3. Add JSON file to vendor specific log page folder (e.g. src/LogPages/ExampleVendor/VU1.json) to properly parse vendor unique log page.
+  3. Add ctypes struct detailing vendor unique log page byte layout (see src/Models/ExampleVendorFile.py for example).
