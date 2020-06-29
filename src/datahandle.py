@@ -66,5 +66,5 @@ def outputData(dict, result_folder, outputToScreen):
         result_file = "diskData{0}.json".format(int(dict['DeviceId']))
         logging.info(json.dumps(dict, indent=2))
         with open(os.path.join(result_folder, result_file), 'w') as f:
-            json.dump(dict, f)
+            json.dump(dict, f, indent=2)
 
