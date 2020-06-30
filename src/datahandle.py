@@ -19,7 +19,7 @@ def byte_swap_enable(enable):
 
 def struct_to_dict(struct_data, log_dict):
     for field in struct_data._fields_:
-        if (not field[0].startswith("reserved")):
+        if (not (field[0].startswith("reserved") or field[0].startswith("rsv") or field[0].startswith("not_populated_yet") or field[0].startswith("padding"))):
             value = getattr(struct_data, field[0])
             if (isinstance(value, int) or isinstance(value, str)):
                 log_dict.update({field[0]:value})
@@ -66,5 +66,5 @@ def outputData(dict, result_folder, outputToScreen):
         result_file = "diskData{0}.json".format(int(dict['DeviceId']))
         logging.info(json.dumps(dict, indent=2))
         with open(os.path.join(result_folder, result_file), 'w') as f:
-            json.dump(dict, f)
+            json.dump(dict, f, indent=2)
 

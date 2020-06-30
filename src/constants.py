@@ -29,7 +29,7 @@ LOG_FETCH_DELAY = 0.01
 
 # Limiting the number of log pages that can be fetched from a single device
 # to avoid overwhelming the telemetry pipe.
-LOG_VU_MAX      = 5
+LOG_VU_MAX      = 6
 
 LOG_PAGE_DIR    = os.path.join(os.path.dirname(__file__), "LogPages/")
 LOG_PAGE_DIR_VU = LOG_PAGE_DIR

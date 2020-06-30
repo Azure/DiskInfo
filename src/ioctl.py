@@ -295,7 +295,7 @@ def GetNVMeIdentify(disk_number, scope):
     specificdata.QueryType = PROPERTY_STANDARD_QUERY
     specificdata.ProtocolType = PROTOCOL_TYPE_NVME
     specificdata.DataType = NVME_DATA_TYPE_IDENTIFY
-    specificdata.ProtocolDataRequestValue = scope
+    specificdata.ProtocolDataRequestValue = 1
     specificdata.ProtocolDataRequestSubValue = 0
     
     # Must subtract 8 from the offset to account for putting PropertyID and QueryType into
